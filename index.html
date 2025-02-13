@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERROR 404</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+    }
+    h1 {
+      color: #333;
+    }
+    .counter {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Page not found...</h1>
+  <div class="counter">
+    Total: <span id="count">loading...</span>
+  </div>
+
+  <script>
+    // Verificar si ya se registró la visita
+    if (!localStorage.getItem('visitaRegistrada')) {
+      // Incrementar el contador solo si es la primera visita
+      fetch('https://api.countapi.xyz/hit/mi-proyecto/visits')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('count').textContent = data.value;
+          localStorage.setItem('visitaRegistrada', 'true'); // Bloquear recargas
+        })
+        .catch(error => {
+          console.error('Error al incrementar el contador:', error);
+          document.getElementById('count').textContent = "Error";
+        });
+    } else {
+      // Si ya visitó, obtener el contador actual sin incrementar
+      fetch('https://api.countapi.xyz/get/mi-proyecto/visits')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('count').textContent = data.value;
+        })
+        .catch(error => {
+          console.error('Error al obtener el contador:', error);
+          document.getElementById('count').textContent = "Error";
+        });
+    }
+  </script>
+</body>
+</html>
