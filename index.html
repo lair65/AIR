@@ -32,34 +32,60 @@
   </div>
 
   <script>
-    // Configuración común
-    const NAMESPACE = 'mi-sitio-web';
-    const KEY = 'visitas-404';
-    
-    if (!localStorage.getItem('visitaRegistrada')) {
-      // Primera visita: Incrementar contador
-      fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`)
-        .then(response => response.json())
+    // Reemplaza esta URL con la llave (bucket) que te hayan dado.
+    const BUCKET_URL = 'https://kvdb.io/H8ufpbFHMSKiKUEWAgaW4v';
+    const KEY = 'visits';
+
+    // Función para obtener el valor actual de la clave
+    function getCount() {
+      return fetch(`${BUCKET_URL}/${KEY}`)
+        .then(res => {
+          // Si la clave no existe aún, KVDB responderá con un error
+          if (!res.ok) {
+            return 0; 
+          }
+          return res.json();
+        })
         .then(data => {
-          document.getElementById('count').textContent = data.value;
-          localStorage.setItem('visitaRegistrada', 'true');
+          // KVDB puede devolver el valor como string o número
+          return typeof data === 'number' ? data : parseInt(data, 10);
         })
         .catch(error => {
-          console.error('Error:', error);
-          document.getElementById('count').textContent = "Offline";
-        });
-    } else {
-      // Visitas posteriores: Solo obtener valor
-      fetch(`https://api.countapi.xyz/get/${NAMESPACE}/${KEY}`)
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('count').textContent = data.value;
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          document.getElementById('count').textContent = "Offline";
+          console.error('Error al obtener el contador:', error);
+          return 0;
         });
     }
+
+    // Función para incrementar el contador
+    function incrementCount() {
+      return fetch(`${BUCKET_URL}/${KEY}/increment`, {
+        method: 'POST'
+      })
+      .then(res => res.json())
+      .then(data => {
+        return typeof data === 'number' ? data : parseInt(data, 10);
+      })
+      .catch(error => {
+        console.error('Error al incrementar el contador:', error);
+        return 0;
+      });
+    }
+
+    // Usamos una función asíncrona para manejar la lógica
+    (async () => {
+      const countSpan = document.getElementById('count');
+      // Verificar si ya se registró la visita en este navegador
+      if (!localStorage.getItem('visitaRegistrada')) {
+        // Incrementa el contador solo en la primera visita
+        const newValue = await incrementCount();
+        countSpan.textContent = newValue;
+        localStorage.setItem('visitaRegistrada', 'true');
+      } else {
+        // Si ya se registró, solo obtener el valor actual
+        const currentValue = await getCount();
+        countSpan.textContent = currentValue;
+      }
+    })();
   </script>
 </body>
 </html>
