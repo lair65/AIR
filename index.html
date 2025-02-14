@@ -32,29 +32,32 @@
   </div>
 
   <script>
-    // Verificar si ya se registró la visita
+    // Configuración común
+    const NAMESPACE = 'mi-sitio-web';
+    const KEY = 'visitas-404';
+    
     if (!localStorage.getItem('visitaRegistrada')) {
-      // Incrementar el contador solo si es la primera visita
-      fetch('https://api.countapi.xyz/hit/mi-proyecto/visits')
+      // Primera visita: Incrementar contador
+      fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`)
         .then(response => response.json())
         .then(data => {
           document.getElementById('count').textContent = data.value;
-          localStorage.setItem('visitaRegistrada', 'true'); // Bloquear recargas
+          localStorage.setItem('visitaRegistrada', 'true');
         })
         .catch(error => {
-          console.error('Error al incrementar el contador:', error);
-          document.getElementById('count').textContent = "Error";
+          console.error('Error:', error);
+          document.getElementById('count').textContent = "Offline";
         });
     } else {
-      // Si ya visitó, obtener el contador actual sin incrementar
-      fetch('https://api.countapi.xyz/get/mi-proyecto/visits')
+      // Visitas posteriores: Solo obtener valor
+      fetch(`https://api.countapi.xyz/get/${NAMESPACE}/${KEY}`)
         .then(response => response.json())
         .then(data => {
           document.getElementById('count').textContent = data.value;
         })
         .catch(error => {
-          console.error('Error al obtener el contador:', error);
-          document.getElementById('count').textContent = "Error";
+          console.error('Error:', error);
+          document.getElementById('count').textContent = "Offline";
         });
     }
   </script>
